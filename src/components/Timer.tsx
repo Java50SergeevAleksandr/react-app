@@ -28,12 +28,8 @@ export const Timer: React.FC<Props> = ({ cityCountry }) => {
     </div>
 }
 
-function findIndex(cityCountry: string): number {
-    console.log("Enter func");
-    return timeZones.findIndex((inp) => JSON.stringify(inp).includes(cityCountry));
-}
-
 function findTimeZone(cityCountry: string): string | undefined {
-    const res = findIndex(cityCountry);
+    console.log("Enter func");
+    const res =  timeZones.findIndex((inp) => JSON.stringify(inp).includes(cityCountry));
     return res === -1 ? undefined : timeZones[res].name;
 }
