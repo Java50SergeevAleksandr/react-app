@@ -11,18 +11,13 @@ export const Timer: React.FC<Props> = ({ cityCountry }) => {
         fontSize: "2em"
     };    
     const [time, setTime] = React.useState(new Date());
-    let myTimeZone;
+    const myTimeZone = { timeZone: findTimeZone(cityCountry) };
 
     function tic() {
         setTime(new Date())
-    }
-
-    function getMyTimeZone() {
-        myTimeZone = { timeZone: findTimeZone(cityCountry) };
-    }
+    }   
     
-    useEffect(() => {
-        getMyTimeZone();
+    useEffect(() => {       
         const interval = setInterval(tic, 1000);
         return () => clearInterval(interval);
     }, [])
