@@ -18,7 +18,10 @@ export const Timer: React.FC<Props> = ({ cityCountry }) => {
     function tic() {
         setTime(new Date())
     }
-
+    useEffect(() => {
+        setZone(cityCountry);
+    }, [cityCountry])
+    
     useEffect(() => {
         myTimeZone.current = { timeZone: findTimeZone(zone) };
     }, [zone])
