@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import timeZones from "../time-zones";
+import { Input } from "./Input";
 
 type Props = {
     cityCountry: string;
@@ -10,26 +11,40 @@ export const Timer: React.FC<Props> = ({ cityCountry }) => {
         backgroundColor: "lightblue",
         fontSize: "2em"
     };
-    const [time, setTime] = React.useState(new Date());
-    const [myTimeZone, setTimeZone] = React.useState(() => ({ timeZone: findTimeZone(cityCountry) }));
+    const [time, setTime] = useState(new Date());
+    const myTimeZone = useRef<Object>();
+    const [zone, setZone] = useState(cityCountry);
 
     function tic() {
         setTime(new Date())
     }
 
     useEffect(() => {
+        myTimeZone.current = { timeZone: findTimeZone(zone) };
+    }, [zone])
+
+    useEffect(() => {
         const interval = setInterval(tic, 1000);
         return () => clearInterval(interval);
     }, [])
 
+    function submit(value: string) {
+        let res = '';
+        const outValue = value.split(" ").map((v) => v.charAt(0).toUpperCase() + v.slice(1).toLowerCase()).join(" ");
+        findTimeZone(value) ? setZone(outValue) : res = `${value} does not exist`
+        return res;
+    }
+
     return <div className="timer">
-        <h2 >Current Time in {cityCountry}</h2>
-        <p style={styles}>{time.toLocaleTimeString("en-GB", myTimeZone)}</p>
+        <Input buttonName="Set Time" placeHolder='Set City or Country' submitFn={submit} />
+        <h2 >Current Time in {zone}</h2>
+        <p style={styles}>{time.toLocaleTimeString("en-GB", myTimeZone.current)}</p>
     </div>
 }
 
-function findTimeZone(cityCountry: string): string | undefined {
+function findTimeZone(zone: string): string | undefined {
     console.log("Enter func");
-    const res = timeZones.findIndex((inp) => JSON.stringify(inp).includes(cityCountry));
-    return res === -1 ? undefined : timeZones[res].name;
+    const res = timeZones.findIndex((obj) => JSON.stringify(obj).toLowerCase().includes(zone.toLowerCase()));
+    return res < 0 ? undefined : timeZones[res].name;
 }
+
