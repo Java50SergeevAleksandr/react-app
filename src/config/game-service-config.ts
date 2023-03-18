@@ -1,3 +1,4 @@
 import GameRow from "../service/GameRow";
 import GameRowSimpleColors from "../service/GameRowSimpleColors";
-export const game: GameRow = new GameRowSimpleColors(10);
+import { GameRowSwapColors } from "../service/GameRowSwapColors";
+export const game: GameRow = new GameRowSwapColors(10);

@@ -8,7 +8,8 @@ type Props = {
 export const Cell: React.FC<Props> = ({ width, cell, clickFn }) => {
     return <div style={{
         width, height: width,
-        backgroundColor: cell.cellColor, border: `solid 1px ${cell.borderColor}`
+        backgroundColor: cell.cellColor, border: `solid 1px ${cell.borderColor}`,
+        borderRadius: "25%"
     }}
         onClick={() => clickFn(cell.id)}>
         {cell.cellContent}

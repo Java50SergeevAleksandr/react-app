@@ -4,16 +4,16 @@ import { getRandomElement } from "../util/random";
 import GameRow from "./GameRow";
 
 export default class GameRowSimpleColors implements GameRow {
-    row: CellType[];
-    constructor(nCells: number) {
-        this.row = Array.from({ length: nCells })
+    row!: CellType[];
+    constructor(readonly nCells: number) {
+    }
+    getInitialRow(): CellType[] {
+        this.row = Array.from({ length: this.nCells })
             .map((__, index) => (
                 {
                     cellColor: getRandomElement(getColors()), borderColor: "black",
                     cellContent: '', id: index
                 }));
-    }
-    getInitialRow(): CellType[] {
         return this.row;
     }
     move(id: number): string | CellType[] {
