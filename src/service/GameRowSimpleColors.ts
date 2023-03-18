@@ -18,13 +18,18 @@ export default class GameRowSimpleColors implements GameRow {
     }
     move(id: number): string | CellType[] {
         let res: string | CellType[];
-        this.isOver()
-            ? res = "game is over"
-            : this.row[id].cellColor = "black";           
-       return res = this.row.slice();
+        if (this.isOver()) {
+            res = "game is over"
+        } else {
+            const resAr = JSON.parse(JSON.stringify(this.row)) as CellType[];
+            resAr[id].cellColor = "black";
+            this.row = resAr;
+            res = this.row;
+        }
+        return res;
     }
-isOver(): boolean {
-    return this.row.every(cell => cell.cellColor == 'black')
-}
+    isOver(): boolean {
+        return this.row.every(cell => cell.cellColor == 'black')
+    }
 
 }
