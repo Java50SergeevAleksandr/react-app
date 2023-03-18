@@ -12,7 +12,7 @@ const authSlice = createSlice({
             state.authUser = data.payload;
         },
         logout: (state) => {
-            state.authUser = "";
+            state.authUser = initialState.authUser;
         }
     }
 })

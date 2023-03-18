@@ -19,21 +19,11 @@ function App() {
     flexDirection: 'column',
 
   }}>
-    {!(authState)
-      ? <Login />
-      : (authState.includes("admin"))
-        ? <>
-          <CounterUpdater operand={10} />
-          <CounterMultiply factor={2} />
-          <CounterSquare />
-          <Logout />
-        </>
-        : <>
-          <CounterUpdater operand={10} />
-          <CounterSquare />
-          <Logout />
-        </>
-    }
+      {authState && <CounterUpdater operand={10}/>}
+    {authState.includes('admin') &&<CounterMultiply factor={2}/>}
+    {authState && <CounterSquare/>}
+    {authState && <Logout/>}
+    {!authState && <Login/>}
   </div>
 }
 
