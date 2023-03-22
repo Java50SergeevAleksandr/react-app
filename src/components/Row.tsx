@@ -13,7 +13,7 @@ export const Row: React.FC<Props> = ({ row }) => {
         return {
             width: size, height: size,
             backgroundColor: cellValue ? "black" : "white",
-            border: "solid 1px gray"
+            border: "solid 1px  gray",            
         }
     }
     function getDivs() {
@@ -25,3 +25,4 @@ export const Row: React.FC<Props> = ({ row }) => {
         {getDivs()}
     </div>
 }
+//#363a41
