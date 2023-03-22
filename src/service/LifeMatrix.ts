@@ -42,15 +42,15 @@ export default class LifeMatrix {
         }
 
         function isUnderpopulation(number: number): Boolean {
-            return number < 2 ? true : false;
+            return number < 2;
         }
 
         function isOvercrowding(number: number): Boolean {
-            return number > 3 ? true : false;
+            return number > 3;
         }
 
         function isReproduction(number: number): Boolean {
-            return number == 3 ? true : false;
+            return number == 3;
         }
     }
 }
