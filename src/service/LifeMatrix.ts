@@ -24,9 +24,9 @@ export default class LifeMatrix {
         function getNumber(initNumber: number, col: number, row: number, array: number[][]): number {
             const borders: Borders = {
                 rowMin: row == 0 ? 0 : row - 1,
-                rowMax: row == array.length ? array.length + 1 : row + 2,
+                rowMax: row == array.length -1 ? array.length + 1 : row + 2,
                 colMin: col == 0 ? 0 : col - 1,
-                colMax: col == array[0].length ? array[0].length + 1 : col + 2
+                colMax: col == array[0].length - 1 ? array[0].length + 1 : col + 2
             }
             const numberOfLifeInArea = getNumberOfLifeCellsInArea(borders);
 
