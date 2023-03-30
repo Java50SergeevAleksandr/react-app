@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { NavLink, Outlet, useNavigate, useNavigation } from "react-router-dom"
 import './navigators.css'
 
@@ -7,15 +7,12 @@ type Props = {
 }
 
 export const Navigator: React.FC<Props> = ({ linkInfo }) => {
-    // const navigation = useNavigation();
-    // const navigate = useNavigate();
-    // let isReloading = navigation.state === "loading" &&
-    //     navigation.formData != null &&
-    //     navigation.formAction === navigation.location.pathname;
-
-    // useEffect( () =>{
-    //     navigate("/");
-    // } ,[isReloading]   )
+    const navigate = useRef(useNavigate());
+    function closeIt() {
+        navigate.current("/");
+        return "";
+    }
+    window.onbeforeunload = closeIt;
 
     function getLinks(linkInfo: { itemLink: string; itemText: string }[]): import("react").ReactNode {
         const res = linkInfo.map((v, i) => <li className="navigator-item paragraph-l" key={i}>
