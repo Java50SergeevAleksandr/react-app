@@ -8,19 +8,22 @@ import { Home } from './components/pages/Home';
 import { NotFound } from './components/pages/NotFound';
 import { Orders } from './components/pages/Orders';
 import { ShoppingCart } from './components/pages/ShoppingCart';
+import { Reload } from './components/Reload';
 import navigators from './config/navigators.json'
 
 
 function App() {
-  const {layout, products} = navigators;
+  const { layout, products } = navigators;
+
   return <BrowserRouter>
+    <Reload />
     <Routes>
-      <Route path='/' element={<Navigator linkInfo={layout}  />}>
+      <Route path='/' element={<Navigator linkInfo={layout} />}>
         <Route index element={<Home />} />
         <Route path='customers' element={<Customers />} />
         <Route path='orders' element={<Orders />} />
         <Route path='shoppingcart' element={<ShoppingCart />} />
-        <Route path='products' element={<Navigator linkInfo={products}  />}>
+        <Route path='products' element={<Navigator linkInfo={products} />}>
           <Route path='dairy' element={<Dairy />} />
           <Route path='bread' element={<Bread />} />
         </Route>
