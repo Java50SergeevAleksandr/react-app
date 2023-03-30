@@ -1,0 +1,36 @@
+.navigator-list {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    list-style: none;
+    width: 80vw
+}
+.navigator-sublist {
+    flex-direction: column;
+}
+.navigator-item {
+    margin-left: 4vw;
+   font-size: 1.5em;
+}
+.active {
+    background-color: #F1CDB3;
+    color: #292929;
+    font-size: 1.2rem;
+    border-radius: 20%;
+    
+}
+.paragraph-l {
+    font-family: 'Arial';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 160%;
+    color: #CDCDCD;
+    
+   
+}
+
+a{
+    text-decoration: none;
+    color: inherit;
+}
