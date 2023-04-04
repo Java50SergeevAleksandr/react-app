@@ -2,13 +2,14 @@ import { AppBar, Box, Tabs, Tab } from "@mui/material";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import React, { ReactNode, useEffect } from "react";
 import { RouteType } from "../../model/RouteType";
+import { useSelector } from "react-redux";
 
 export type Props = {
     subnav?: boolean,
     routes: RouteType[]
 }
 export const NavigatorDesktop: React.FC<Props> = ({ subnav, routes }) => {
-
+    const authState = useSelector<any, string>(state => state.auth.authUser);
     const [value, setValue] = React.useState(0);
     const navigate = useNavigate();
 
@@ -16,7 +17,8 @@ export const NavigatorDesktop: React.FC<Props> = ({ subnav, routes }) => {
         if (!subnav) {
             navigate(routes[0].path)
         }
-    }, [routes])
+        setValue(0);
+    }, [routes, authState])
 
     const handleChange = (event: any, newValue: number) => {
         setValue(newValue);
