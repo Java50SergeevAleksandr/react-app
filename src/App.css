@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  height: 90vh;
 }
 .secondBox {
   padding: 3vw;
@@ -10,8 +11,6 @@
   justify-content: center;
 }
 .timer {
-  margin: 10px;
-  border: 1px solid cornflowerblue;
-  border-radius: 15px;
+  margin: 10px;  
   text-align: center;
 }
