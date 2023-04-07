@@ -1,17 +1,29 @@
 import React from 'react';
+
 import './App.css';
-import { Timer } from './components/Timer';
+import { CounterMultiply } from './components/CounterMultiply';
+import { CounterSquare } from './components/CounterSquare';
+import { CounterUpdater } from './components/CounterUpdater';
+import { useSelector } from 'react-redux';
+import { Login } from './components/Login';
+import { Logout } from './components/Logout'
 
 function App() {
-  return <div className='mainBox'>
-    <div className='secondBox'>
-      <Timer cityCountry="Minsk" />
-      <Timer cityCountry="Israel" />
-    </div>
-    <div className='secondBox'>
-      <Timer cityCountry="Japan" />
-      <Timer cityCountry="arto" />
-    </div>
+  const authState = useSelector<any, string>(state => state.auth.authUser);
+
+  return <div style={{
+
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column',
+
+  }}>
+      {authState && <CounterUpdater operand={10}/>}
+    {authState.includes('admin') &&<CounterMultiply factor={2}/>}
+    {authState && <CounterSquare/>}
+    {authState && <Logout/>}
+    {!authState && <Login/>}
   </div>
 }
 
