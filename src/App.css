@@ -3,28 +3,10 @@ html {
 }
 
 body {
+  background-color: rgb(92, 92, 92);
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-content: center;
-}
-
-.mainBox {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  height: 90vh;
-}
-
-.secondBox {
-  padding: 3vw;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.timer {
-  margin: 10px;
-  text-align: center;
+  align-items: center;
 }
