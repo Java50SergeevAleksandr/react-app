@@ -1,0 +1,34 @@
+{
+    "layout": [
+        {
+            "itemLink": "/",
+            "itemText": "Home"
+        },
+        {
+            "itemLink": "/shoppingcart",
+            "itemText": "Shopping Cart"
+        },
+        {
+            "itemLink": "/orders",
+            "itemText": "Orders"
+        },
+        {
+            "itemLink": "/customers",
+            "itemText": "Customers"
+        },
+        {
+            "itemLink": "/products",
+            "itemText": "Products"
+        }
+    ],
+    "products": [
+        {
+            "itemLink": "/products/dairy",
+            "itemText": "Dairy Products"
+        },
+        {
+            "itemLink": "/products/bread",
+            "itemText": "Bread Products"
+        }
+    ]
+}
