@@ -53,6 +53,7 @@ export const LoginForm: React.FC<Props> = ({ submitFn }) => {
   };
 
   function googleAuth() {
+    setOpen(true);
     const signData: LoginData = {
       email: "GOOGLE",
       password: '',
