@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import './App.css';
@@ -23,23 +23,23 @@ function App() {
   const authState = useSelector<any, string>(state => state.auth.authUser);
 
   function getRoutes(): RouteType[] {
-    if (authState.includes('admin')) {
-      return routes.filter(v => v.always || v.admin)
+    const routesRes = routes.filter(routePredicate);
+    const logoutRoute = routes.find(route => route.path === '/logout');
+    if (logoutRoute) {
+         logoutRoute.label = authState;
     }
-    if (authState) {
-      return routes.filter(v => v.always || v.authenticated)
-    }
-    if (!authState) {
-      return routes.filter(v => v.always || v.no_authenticated)
-    }
-
-    else throw new Error("Error authState");
-  }
+    return routesRes;
+}
+function routePredicate(route: RouteType): boolean | undefined {
+    return route.always ||( route.authenticated && !!authState )
+     || (route.admin && authState.includes('admin')) ||
+      (route.no_authenticated && !authState)  
+}
 
   return <BrowserRouter>
     <Routes>
       <Route path='/' element={<NavigatorDesktop routes={getRoutes()} />}>
-        <Route index element={<Login />} />
+        <Route index element={<Home />} />
         <Route path='login' element={<Login />} />
         <Route path='home' element={<Home />} />
         <Route path='logout' element={<Logout />} />

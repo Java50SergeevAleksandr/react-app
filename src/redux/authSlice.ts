@@ -1,9 +1,8 @@
-import { createSlice } from "@reduxjs/toolkit";
-
-const initialState: { authUser: string } = {
-    authUser: ""
+import {createSlice} from '@reduxjs/toolkit'
+import { AUTH_USER_ITEM } from '../config/auth-service-config';
+const initialState: {authUser: string} = {
+    authUser: localStorage.getItem(AUTH_USER_ITEM) || ''
 }
-
 const authSlice = createSlice({
     initialState,
     name: "auth",
@@ -12,7 +11,7 @@ const authSlice = createSlice({
             state.authUser = data.payload;
         },
         logout: (state) => {
-            state.authUser = initialState.authUser;
+            state.authUser = '';
         }
     }
 })
