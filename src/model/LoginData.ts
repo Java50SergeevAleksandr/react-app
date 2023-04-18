@@ -1,4 +1,4 @@
 export type LoginData = {
-    email: FormDataEntryValue | null,
-    password: FormDataEntryValue | null,
+    email: string,
+    password: string,
 }
