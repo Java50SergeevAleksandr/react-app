@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { productsService } from "./config/products-service-config"
 import productsConfig from "./config/products-config.json"
 import { getRandomNumber } from "./util/random";
