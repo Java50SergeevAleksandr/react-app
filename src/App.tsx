@@ -32,15 +32,14 @@ function App() {
   }
 
   useEffect(() => {
-    const subscription = productsService.getProducts()
-      .subscribe({
-        next: (products: ProductType[]) => {
-          console.log(products)
-          dispatch(productsActions.setProducts(products))
-        }
-      })
+    const subscription = productsService.getProducts().subscribe({
+      next: (products: ProductType[]) => {
+        console.log(products)
+        dispatch(productsActions.setProducts(products))
+      }
+    })
     return () => subscription.unsubscribe()
-  })
+  }, [])
 
   function routePredicate(route: RouteType): boolean | undefined {
     return route.always || (route.authenticated && !!authState)
