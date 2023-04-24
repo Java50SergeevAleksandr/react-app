@@ -3,9 +3,11 @@ import { ProductType } from "../model/ProductType";
 import ProductsService from "./ProductsService";
 import productsConfig from "../config/products-config.json"
 import { firebaseApp } from "../config/firebase-config";
+import { collectionData } from "rxfire/firestore";
 import { getFirestore, collection, getDoc, deleteDoc, setDoc, getCountFromServer, doc }
     from "firebase/firestore";
 import { getRandomNumber } from "../util/random";
+import { Observable } from "rxjs";
 export const PRODUCTS_COLLECTION = "products";
 export const CATEGORIES_COLLECTION = "categories";
 export class ProductsServiceFirebase implements ProductsService {
@@ -31,7 +33,7 @@ export class ProductsServiceFirebase implements ProductsService {
         const collectionData = (await getCountFromServer(this.productsCollection)).data();
         let count: number = collectionData.count;
         console.log(`Collection ${PRODUCTS_COLLECTION} contains ${count} products`)
-        if (count == 0) {
+        if (count === 0) {
             const products: ProductType[] = productsConfig.map(pc => {
                 const category = pc.name.split("-")[0];
                 return {
@@ -52,5 +54,7 @@ export class ProductsServiceFirebase implements ProductsService {
         }
         return count;
     }
-
+    getProducts(): Observable<ProductType[]> {
+        return collectionData(this.productsCollection) as Observable<ProductType[]>
+    }
 }
