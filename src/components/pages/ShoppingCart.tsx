@@ -15,7 +15,7 @@ export const ShoppingCart: React.FC = () => {
     function getTableData(): ShoppingProductDataType[] {
         return shoppingCart.map(v => {
             const index = productsState.find(e => e.id === v.id);
-            const obj = {
+            return {
                 id: v.id,
                 count: v.count,
                 title: index!.title,
@@ -24,8 +24,7 @@ export const ShoppingCart: React.FC = () => {
                 cost: index!.cost,
                 image: index!.image,
                 totalCost: v.count * index!.cost,
-            }           
-            return obj           
+            }
         })
     }
 
