@@ -13,9 +13,10 @@ export const ShoppingCart: React.FC = () => {
     const tableData = useMemo(() => getTableData(), [productsState, shoppingCart]);
 
     function getTableData(): ShoppingProductDataType[] {
-        return shoppingCart.map(v => {
+        let state = true;
+        const arr = shoppingCart.map(v => {
             const index = productsState.find(e => e.id === v.id);
-            return {
+            const obj = {
                 id: v.id,
                 count: v.count,
                 title: index!.title,
@@ -24,34 +25,39 @@ export const ShoppingCart: React.FC = () => {
                 cost: index!.cost,
                 image: index!.image,
                 totalCost: v.count * index!.cost,
-            }
+            };
+            if (index === undefined) { state = false }
+            return obj            
         })
+
+        return state ? arr : []
     }
 
-    function getTotalCost() {
-        return tableData.reduce((r, v) => r + v.totalCost, 0)
-    }
 
-    const columns: GridColDef[] = [
-        {
-            field: "image", headerName: 'Image', flex: 1,
-            renderCell: (params) => <Avatar src={`images/${params.value}`}
-                sx={{ width: "30%", height: "80px" }} />, align: "center", headerAlign: "center"
-        },
-        { field: "title", headerName: 'Title', flex: 0.8 },
-        { field: "unit", headerName: "Unit", flex: 0.4 },
-        { field: "cost", headerName: "Price (NIS)", flex: 0.3 },
-        { field: "count", headerName: "Count of the product unitsount", flex: 0.5 },
-        { field: "totalCost", headerName: `Total cost (NIS)`, flex: 0.5 }
-    ]
-    return <>
-        <Box sx={{ width: "80vw", height: "50vh" }}>
-            <DataGrid columns={columns} rows={tableData} getRowHeight={() => 'auto'} />
-            <Typography gutterBottom variant="h5" component="div" sx={{ fontSize: "2.2em", display: "flex", width: "100%", height: "100%", justifyContent: "right" }}>
-                {` Total cost: ${getTotalCost()} NIS`}
-            </Typography>
-        </Box>
-    </>
+function getTotalCost() {
+    return tableData.reduce((r, v) => r + v.totalCost, 0)
+}
+
+const columns: GridColDef[] = [
+    {
+        field: "image", headerName: 'Image', flex: 1,
+        renderCell: (params) => <Avatar src={`images/${params.value}`}
+            sx={{ width: "30%", height: "80px" }} />, align: "center", headerAlign: "center"
+    },
+    { field: "title", headerName: 'Title', flex: 0.8 },
+    { field: "unit", headerName: "Unit", flex: 0.4 },
+    { field: "cost", headerName: "Price (NIS)", flex: 0.3 },
+    { field: "count", headerName: "Count of the product unitsount", flex: 0.5 },
+    { field: "totalCost", headerName: `Total cost (NIS)`, flex: 0.5 }
+]
+return <>
+    <Box sx={{ width: "80vw", height: "50vh" }}>
+        <DataGrid columns={columns} rows={tableData} getRowHeight={() => 'auto'} />
+        <Typography gutterBottom variant="h5" component="div" sx={{ fontSize: "2.2em", display: "flex", width: "100%", height: "100%", justifyContent: "right" }}>
+            {` Total cost: ${getTotalCost()} NIS`}
+        </Typography>
+    </Box>
+</>
 
 }
 
