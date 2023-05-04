@@ -17,6 +17,9 @@ import { productsService } from './config/products-service-config';
 import { ProductType } from './model/ProductType';
 import { Products } from './components/pages/Products';
 import { productsActions } from './redux/productsSlice';
+import { Subscription } from 'rxjs';
+import { ordersService } from './config/orders-service-config';
+import { shoppingActions } from './redux/shoppingSlice';
 
 
 function App() {
@@ -41,8 +44,24 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
+  useEffect(() => {
+    let subscription: Subscription;
+    if (authState !== ('' && authState.includes("admin"))) {
+      subscription = ordersService.getShoppingCart(authState).subscribe({
+        next: (shopping) => dispatch(shoppingActions.setShopping(shopping))
+      })
+    } else {
+      dispatch(shoppingActions.resetShopping());
+    }
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    }
+  }, [authState])
+
   function routePredicate(route: RouteType): boolean | undefined {
-    return route.always || (route.authenticated && !!authState)
+    return route.always || (route.authenticated && !!authState) || (route.client && !(authState.includes('admin'))) && !!authState
       || (route.admin && authState.includes('admin')) ||
       (route.no_authenticated && !authState)
   }
