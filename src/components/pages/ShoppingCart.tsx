@@ -5,59 +5,61 @@ import { useSelector } from "react-redux"
 import { ShoppingProductType } from "../../model/ShoppingProductType"
 import { ShoppingProductDataType } from "../../model/ShoppingProductDataType"
 import { useMemo } from "react"
+import { ordersService } from "../../config/orders-service-config"
 
 
 export const ShoppingCart: React.FC = () => {
-    const productsState: ProductType[] = useSelector<any, ProductType[]>(state => state.productsState.products);
-    const shoppingCart: ShoppingProductType[] = useSelector<any, ShoppingProductType[]>(state => state.shoppingState.shopping);
-    const tableData = useMemo(() => getTableData(), [productsState, shoppingCart]);
-
+    const products = useSelector<any, ProductType[]>(state => state.productsState.products);
+    const shopping = useSelector<any, ShoppingProductType[]>
+        (state => state.shoppingState.shopping);
+    const authUser = useSelector<any, string>(state => state.auth.authUser);
+    const tableData = useMemo(() => getTableData(), [products, shopping]);
+    const total = useMemo(() => getTotalCost(), [tableData]);
+    function getTotalCost(): number {
+        return tableData.reduce((res, cur) => res + cur.price, 0);
+    }
     function getTableData(): ShoppingProductDataType[] {
-        let state = true;
-        const arr = shoppingCart.map(v => {
-            const index = productsState.find(e => e.id === v.id);
-            const obj = {
-                id: v.id,
-                count: v.count,
-                title: index!.title,
-                category: index!.category,
-                unit: index!.unit,
-                cost: index!.cost,
-                image: index!.image,
-                totalCost: v.count * index!.cost,
-            };
-            if (index === undefined) { state = false }
-            return obj            
-        })
+        const shoppingData: ShoppingProductDataType[] = shopping.map(s => getShoppingProduct(s))
+        return shoppingData.filter(sd => sd.id)
+    }
+    function getShoppingProduct(shoppingProduct: ShoppingProductType): ShoppingProductDataType {
+        const product: ProductType | undefined = products.find
+            (p => shoppingProduct.id == p.id);
+        let res: ShoppingProductDataType = {
+            id: "", category: '', cost: 0, count: 0,
+            title: '', image: '', price: 0, unit: ''
+        };
+        if (!product) {
+            ordersService.removeShoppingProduct(authUser, shoppingProduct.id);
+        } else {
+            res = { ...product, count: shoppingProduct.count, price: +(product.cost * shoppingProduct.count).toFixed(2) };
+        }
+        return res;
 
-        return state ? arr : []
     }
 
+    const columns: GridColDef[] = [
+        {
+            field: 'image', headerName: '', flex: 0.5, align: 'center', headerAlign: 'center',
+            renderCell: (params) => <Avatar src={`images/${params.value}`} sx={{ width: "50%", height: "12vh" }} />
+        },
+        { field: "title", headerName: 'Title', flex: 0.8 },
+        { field: "unit", headerName: "Unit", flex: 0.4 },
+        { field: "cost", headerName: "Price (NIS)", flex: 0.3 },
+        { field: "count", headerName: "Count of the product units count", flex: 0.5 },
+        { field: "price", headerName: `Total cost (NIS)`, flex: 0.5 }
+    ]
+    return <>
+        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '80vh', alignItems: 'center' }}>
+            <Box sx={{ height: '60vh', width: '70vw' }}>
+                <DataGrid columns={columns} rows={tableData} getRowHeight={() => 'auto'} />
+            </Box>
 
-function getTotalCost() {
-    return tableData.reduce((r, v) => r + v.totalCost, 0)
-}
+            <Typography variant="h6">Total cost: {total.toFixed(2)}{' '}
+                <img src="images/israeli-shekel-icon.svg" width="3%" /></Typography>
 
-const columns: GridColDef[] = [
-    {
-        field: "image", headerName: 'Image', flex: 1,
-        renderCell: (params) => <Avatar src={`images/${params.value}`}
-            sx={{ width: "30%", height: "80px" }} />, align: "center", headerAlign: "center"
-    },
-    { field: "title", headerName: 'Title', flex: 0.8 },
-    { field: "unit", headerName: "Unit", flex: 0.4 },
-    { field: "cost", headerName: "Price (NIS)", flex: 0.3 },
-    { field: "count", headerName: "Count of the product unitsount", flex: 0.5 },
-    { field: "totalCost", headerName: `Total cost (NIS)`, flex: 0.5 }
-]
-return <>
-    <Box sx={{ width: "80vw", height: "50vh" }}>
-        <DataGrid columns={columns} rows={tableData} getRowHeight={() => 'auto'} />
-        <Typography gutterBottom variant="h5" component="div" sx={{ fontSize: "2.2em", display: "flex", width: "100%", height: "100%", justifyContent: "right" }}>
-            {` Total cost: ${getTotalCost()} NIS`}
-        </Typography>
-    </Box>
-</>
+        </Box>
+    </>
 
 }
 
