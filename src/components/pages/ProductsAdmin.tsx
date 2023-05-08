@@ -36,7 +36,7 @@ export const ProductsAdmin: React.FC = () => {
         if (Math.abs(rowData.cost - oldRowData.cost) > oldRowData.cost * 0.5) {
             throw 'Price  cannot be greater than on 50% from the existing cost'
         }
-        await productsService.addProduct(rowData);
+        await productsService.changeProduct(rowData);
         return newRow
     }
 

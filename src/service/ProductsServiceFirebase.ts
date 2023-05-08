@@ -19,6 +19,9 @@ export class ProductsServiceFirebase implements ProductsService {
         };
         await setDoc(doc(this.productsCollection, product.id), product);
     }
+    async changeProduct(product: ProductType): Promise<void> {        
+        await setDoc(doc(this.productsCollection, product.id), product);
+    }
     async addCategory(category: CategoryType): Promise<void> {
         await setDoc(doc(this.categoriesCollection, category.name), category);
     }
