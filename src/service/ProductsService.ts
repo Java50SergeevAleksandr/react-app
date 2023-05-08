@@ -10,5 +10,6 @@ export default interface ProductsService {
     removeCategory(category: string): Promise<void>;
     isCategoryExist(category: string): Promise<boolean>;
     setProducts(): Promise<number>;
-    getProducts(): Observable<ProductType[]>
+    getProducts(): Observable<ProductType[]>;
+    getCategories():Observable<CategoryType[]>
 }

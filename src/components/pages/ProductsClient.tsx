@@ -36,7 +36,7 @@ export const ProductsClient: React.FC = () => {
                             component="img"
                             alt={product.image}
                             height="200"
-                            image={`images/${product.image}`}
+                            image={product.image.startsWith("http") || product.image.length > 40 ? product.image : `images/${product.image}`}
                         />
                         <CardContent sx={{ minHeight: "115px" }}>
                             <Typography gutterBottom variant="h5" component="div">

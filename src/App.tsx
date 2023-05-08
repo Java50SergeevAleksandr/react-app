@@ -20,6 +20,8 @@ import { productsActions } from './redux/productsSlice';
 import { Subscription } from 'rxjs';
 import { ordersService } from './config/orders-service-config';
 import { shoppingActions } from './redux/shoppingSlice';
+import { CategoryType } from './model/CategoryType';
+import { categoriesActions } from './redux/categoriesSlice';
 
 
 function App() {
@@ -39,6 +41,15 @@ function App() {
       next: (products: ProductType[]) => {
         console.log(products)
         dispatch(productsActions.setProducts(products))
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    const subscription = productsService.getCategories().subscribe({
+      next: (categories: CategoryType[]) => {
+        dispatch(categoriesActions.setCategories(categories))
       }
     })
     return () => subscription.unsubscribe()

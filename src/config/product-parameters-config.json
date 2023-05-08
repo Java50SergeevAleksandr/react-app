@@ -1,0 +1,9 @@
+{
+    "units": [
+        "piece",
+        "100g",
+        "box"
+    ],
+    "minCost": 1,
+    "maxCost": 300
+}

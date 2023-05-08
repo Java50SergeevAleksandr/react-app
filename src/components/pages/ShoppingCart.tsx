@@ -58,7 +58,8 @@ export const ShoppingCart: React.FC = () => {
         {
             field: 'image', headerName: '', flex: 0.5, align: 'center', sortable: false,
             headerAlign: 'center',
-            renderCell: (params) => <Avatar src={`images/${params.value}`} sx={{ width: "50%", height: "12vh" }} />
+            renderCell: (params) => <Avatar src={params.value.startsWith("http") || params.value.length > 40 ? params.value :
+                `images/${params.value}`} sx={{ width: "50%", height: "12vh" }} />
         },
         {
             field: 'title', headerName: 'Title', flex: 1, align: 'center', headerAlign: 'center'

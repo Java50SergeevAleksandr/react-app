@@ -19,7 +19,7 @@ export class ProductsServiceFirebase implements ProductsService {
         };
         await setDoc(doc(this.productsCollection, product.id), product);
     }
-    async changeProduct(product: ProductType): Promise<void> {        
+    async changeProduct(product: ProductType): Promise<void> {
         await setDoc(doc(this.productsCollection, product.id), product);
     }
     async addCategory(category: CategoryType): Promise<void> {
@@ -61,5 +61,8 @@ export class ProductsServiceFirebase implements ProductsService {
     }
     getProducts(): Observable<ProductType[]> {
         return collectionData(this.productsCollection) as Observable<ProductType[]>
+    }
+    getCategories(): Observable<CategoryType[]> {
+        return collectionData(this.categoriesCollection) as Observable<CategoryType[]> 
     }
 }
