@@ -9,13 +9,12 @@ type Props = {
     submitFn: (product: ProductType) => string
 }
 const initialProduct: ProductType = {
-    category: 'bread', image: '', cost: 20, title: 'breadx', unit: 'piece'
+    category: '', image: '', cost: 0, title: '', unit: ''
 };
 export const ProductForm: React.FC<Props> = ({ submitFn }) => {
     const categories = useSelector<any, CategoryType[]>(state => state.categoriesState.categories)
     const [product, setProduct] = useState<ProductType>(initialProduct);
     const [open, setOpen] = useState<boolean>(false);
-    const image = useRef<string>('');
     const alertMessage = useRef<string>('');
 
     function onSubmitFn(event: any) {
@@ -32,7 +31,6 @@ export const ProductForm: React.FC<Props> = ({ submitFn }) => {
 
     function imageHandler(event: any) {
         const urlImage = event.target.value;
-        image.current = urlImage;
         setProduct({ ...product, image: urlImage });
     }
 
@@ -59,7 +57,7 @@ export const ProductForm: React.FC<Props> = ({ submitFn }) => {
         setProduct({ ...product, cost: event.target.value });
     };
     return <Box>
-        <form onSubmit={onSubmitFn}>
+        <form onSubmit={onSubmitFn} onReset={() => { setProduct(initialProduct); }}>
             <Grid container spacing={4} justifyContent={'start'}>
                 <Grid item xs={8} md={7}>
                     <TextField sx={{ m: 1, minWidth: 120 }} label='URL image'
@@ -67,8 +65,7 @@ export const ProductForm: React.FC<Props> = ({ submitFn }) => {
                         onChange={imageHandler} />
                 </Grid>
                 <Grid item xs={5}>
-                    {image.current && <img height={"150vw"}
-                        src={image.current} />}
+                    {product.image && <img height={"150vw"} src={product.image} />}
                 </Grid>
                 <Grid item xs={8} md={7}>
                     <TextField sx={{ m: 1, minWidth: 120 }} label='Title'
