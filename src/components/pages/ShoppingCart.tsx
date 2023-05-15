@@ -1,4 +1,4 @@
-import { Box, Avatar, Typography, Snackbar, Alert } from "@mui/material"
+import { Box, Avatar, Typography, Snackbar, Alert, Button } from "@mui/material"
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid"
 import { ProductType } from "../../model/ProductType"
 import { useSelector } from "react-redux"
@@ -95,7 +95,7 @@ export const ShoppingCart: React.FC = () => {
                     {alertMessage.current}
                 </Alert>
             </Snackbar>
-
+            <Button onClick={async () => await ordersService.createOrder(authUser, tableData)}>ORDER</Button>
         </Box>
     </>
 

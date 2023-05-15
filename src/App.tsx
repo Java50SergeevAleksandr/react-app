@@ -22,6 +22,7 @@ import { ordersService } from './config/orders-service-config';
 import { shoppingActions } from './redux/shoppingSlice';
 import { CategoryType } from './model/CategoryType';
 import { categoriesActions } from './redux/categoriesSlice';
+import { ordersActions } from './redux/ordersSlice';
 
 
 function App() {
@@ -69,6 +70,20 @@ function App() {
         subscription.unsubscribe();
       }
     }
+  }, [authState])
+
+  useEffect(() => {
+    let subscription: Subscription;
+    if (authState) {
+      subscription = authState.includes('admin') ? ordersService.getAllOrders()
+        .subscribe({
+          next: (orders) => dispatch(ordersActions.setOrders(orders))
+        }) : ordersService.getCustomerOrders(authState)
+          .subscribe({
+            next: (orders) => dispatch(ordersActions.setOrders(orders))
+          })
+    }
+    return () => subscription && subscription.unsubscribe();
   }, [authState])
 
   function routePredicate(route: RouteType): boolean | undefined {
