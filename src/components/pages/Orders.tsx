@@ -72,18 +72,20 @@ export const Orders: React.FC = () => {
         const rowData: OrderType = newRow;
         const date = Date.parse(rowData.deliveryDate);
         let confirm = false;
-        if (isNaN(date)) {
-            throw 'Date not in format YYYY-MM-DD, or contains illegal date values'
-        }
+        if (rowData.deliveryDate) {
+            if (isNaN(date)) {
+                throw 'Date not in format YYYY-MM-DD, or contains illegal date values'
+            }
 
-        if (rowData.orderDate > rowData.deliveryDate) {
-            throw 'Date must not be less than the OrderDate'
-        }
 
-        if (new Date().toISOString().substring(0, 10) < rowData.deliveryDate) {
-            throw 'Date must not be greater than the current date'
-        }
+            if (rowData.orderDate > rowData.deliveryDate) {
+                throw 'Date must not be less than the OrderDate'
+            }
 
+            if (new Date().toISOString().substring(0, 10) < rowData.deliveryDate) {
+                throw 'Date must not be greater than the current date'
+            }
+        }
         dialogState.current.message = `Update date to ${rowData.deliveryDate} ?`;
         dialogState.current.action = async () => {
             await ordersService.updateOrder(rowData);
@@ -91,7 +93,8 @@ export const Orders: React.FC = () => {
         };
         setDialogOpen(true);
 
-        return confirm ? newRow : oldRow       
+        return confirm ? newRow : oldRow
+
     }
 
     return <Box>
