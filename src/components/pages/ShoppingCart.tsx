@@ -7,10 +7,17 @@ import { ShoppingProductDataType } from "../../model/ShoppingProductDataType"
 import { useMemo, useRef, useState } from "react"
 import { ordersService } from "../../config/orders-service-config"
 import { Delete } from "@mui/icons-material"
+import { ConfirmationDialog } from "../ConfirmationDialog"
 
 
 export const ShoppingCart: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false);
+    const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
+    const dialogState = useRef<any>({
+        isOpen: false,
+        message: "",
+        action: () => '',
+    });
     const alertMessage = useRef<string>('');
     const products = useSelector<any, ProductType[]>(state => state.productsState.products);
     const shopping = useSelector<any, ShoppingProductType[]>
@@ -71,7 +78,12 @@ export const ShoppingCart: React.FC = () => {
         {
             field: 'actions', type: 'actions', flex: 0.1, getActions: (params) => [
                 <GridActionsCellItem label="remove" icon={<Delete />}
-                    onClick={async () => await ordersService.removeShoppingProduct(authUser, params.id as string)} />
+                    onClick={() => {
+                        dialogState.current.message = 'Remove order?';
+                        dialogState.current.action = async () => await ordersService.removeShoppingProduct(authUser, params.id as string);
+                        setDialogOpen(true);
+                    }}
+                />
             ]
         }
 
@@ -96,6 +108,7 @@ export const ShoppingCart: React.FC = () => {
                 </Alert>
             </Snackbar>
             <Button onClick={async () => await ordersService.createOrder(authUser, tableData)}>ORDER</Button>
+            <ConfirmationDialog isOpen={isDialogOpen} message={dialogState.current.message} state={setDialogOpen} action={dialogState.current.action} />
         </Box>
     </>
 

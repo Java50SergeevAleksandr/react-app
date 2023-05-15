@@ -1,4 +1,4 @@
-import { Box, Avatar, Alert, Snackbar, Button } from "@mui/material"
+import { Box, Avatar, Alert, Snackbar, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material"
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid"
 import { ProductType } from "../../model/ProductType"
 import { useSelector } from "react-redux"
@@ -6,12 +6,27 @@ import { Add, Delete } from "@mui/icons-material"
 import { productsService } from "../../config/products-service-config"
 import { useRef, useState } from "react"
 import { ProductForm } from "../forms/ProductForm"
+import { ConfirmationDialog } from "../ConfirmationDialog"
 
 export const ProductsAdmin: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false);
-    const [flAdd, setFlAdd] = useState<boolean>(false);
+    const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [isProductAdd, setProductAdd] = useState<boolean>(false);
     const alertMessage = useRef<string>('');
+    const dialogState = useRef<any>({
+        isOpen: false,
+        message: "",
+        action: () => '',
+    });
+
+    const productID = useRef<string>('');
     const products: ProductType[] = useSelector<any, ProductType[]>(state => state.productsState.products);
+
+
+    const handleClose = () => {
+        setDialogOpen(false);
+    };
+
     const columns: GridColDef[] = [
         {
             field: "image", headerName: '', flex: 0.3, editable: true,
@@ -25,7 +40,11 @@ export const ProductsAdmin: React.FC = () => {
         { field: "cost", headerName: "Cost (NIS)", flex: 0.2, editable: true, type: "number" },
         {
             field: "actions", type: "actions", flex: 0.1, getActions: (params) => [
-                <GridActionsCellItem label="remove" icon={<Delete />} onClick={async () => await productsService.removeProduct(params.id as string)} />
+                <GridActionsCellItem label="remove" icon={<Delete />} onClick={() => {
+                    dialogState.current.message = 'Remove product from data-base?';
+                    dialogState.current.action = async () => await productsService.removeProduct(params.id as string);
+                    setDialogOpen(true);
+                }} />
             ]
         }
     ]
@@ -43,36 +62,67 @@ export const ProductsAdmin: React.FC = () => {
         return newRow
     }
 
+
     function submitAddProduct(product: ProductType): string {
         const validation = products.find(v => (product.title === v.title && product.unit === v.unit))
         if (validation === undefined) {
             productsService.addProduct(product);
-            setFlAdd(false);
+            setProductAdd(false);
             return '';
         } else {
             return 'Product already exist';
         }
     }
 
-    return !flAdd ? <Box sx={{
-        width: "100vw", display: "flex",
-        flexDirection: "column", justifyContent: "center", alignItems: "center"
-    }}>
-        <Box sx={{ width: "80vw", height: "60vh" }}>
-            <DataGrid columns={columns} rows={products} getRowHeight={() => 'auto'}
-                processRowUpdate={updateCost}
-                onProcessRowUpdateError={(error) => {
-                    alertMessage.current = error;
-                    setOpen(true)
-                }} />
-        </Box>
-        <Button onClick={() => setFlAdd(true)}>
-            <Add></Add>
-        </Button>
-        <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={open} autoHideDuration={6000} onClose={() => setOpen(false)}>
-            <Alert severity="error" sx={{ width: '30vw', fontSize: '1.5em' }}>
-                {alertMessage.current}
-            </Alert>
-        </Snackbar>
-    </Box> : <ProductForm submitFn={submitAddProduct}></ProductForm>;
+    return !isProductAdd ?
+        <Box sx={{
+            width: "100vw", display: "flex",
+            flexDirection: "column", justifyContent: "center", alignItems: "center"
+        }}>
+            <Box sx={{ width: "80vw", height: "60vh" }}>
+                <DataGrid columns={columns} rows={products} getRowHeight={() => 'auto'}
+                    processRowUpdate={updateCost}
+                    onProcessRowUpdateError={(error) => {
+                        alertMessage.current = error;
+                        setOpen(true)
+                    }} />
+            </Box>
+            <Button onClick={() => setProductAdd(true)}>
+                <Add></Add>
+            </Button>
+            <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={open} autoHideDuration={6000} onClose={() => setOpen(false)}>
+                <Alert severity="error" sx={{ width: '30vw', fontSize: '1.5em' }}>
+                    {alertMessage.current}
+                </Alert>
+            </Snackbar>
+
+            <ConfirmationDialog isOpen={isDialogOpen} message={dialogState.current.message} state={setDialogOpen} action={dialogState.current.action} />
+
+            {/* <Dialog
+                open={isDialogOpen}
+                onClose={handleClose}
+                aria-labelledby="remove-product-alert-dialog"
+                aria-describedby="confirm-remove-product"
+            >
+                <DialogTitle id="remove-product-alert-dialog">
+                    {"Remove product from data-base?"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Remove product from data-base.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Disagree</Button>
+                    <Button onClick={async () => {
+                        await productsService.removeProduct(productID.current);
+                        productID.current = '';
+                        handleClose();
+                    }}>
+                        Agree
+                    </Button>
+                </DialogActions>
+            </Dialog> */}
+        </Box> :
+        <ProductForm submitFn={submitAddProduct}></ProductForm>;
 }
