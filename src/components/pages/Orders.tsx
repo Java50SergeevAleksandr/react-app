@@ -5,16 +5,22 @@ import { useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { ordersService } from "../../config/orders-service-config";
 import { OrderType } from "../../model/OrderType";
+import { ConfirmationDialog } from "../ConfirmationDialog";
 import { OrderContent } from "../OrderContent";
 
 export const Orders: React.FC = () => {
     const authUser = useSelector<any, string>(state => state.auth.authUser);
     const orders = useSelector<any, OrderType[]>(state => state.ordersState.orders);
     const [open, setOpen] = useState<boolean>(false);
+    const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
     const [openContent, setOpenContent] = useState(false);
     const columns: GridColDef[] = useMemo(() => getColumns(), [authUser, orders]);
     const orderId = useRef('');
     const alertMessage = useRef<string>('');
+    const dialogState = useRef<any>({
+        message: "",
+        action: () => '',
+    });
 
     function getTotalCost(params: GridValueGetterParams): number {
         return params.row.shopping.reduce((res: number, cur: { price: number; }) => res + cur.price, 0);
@@ -62,9 +68,10 @@ export const Orders: React.FC = () => {
         return authUser.includes('admin') ? adminColumns.concat(commonColumns) : commonColumns
     }
 
-    async function updateDate(newRow: any): Promise<any> {
+    async function updateDate(newRow: any, oldRow: any): Promise<any> {
         const rowData: OrderType = newRow;
         const date = Date.parse(rowData.deliveryDate);
+        let confirm = false;
         if (isNaN(date)) {
             throw 'Date not in format YYYY-MM-DD, or contains illegal date values'
         }
@@ -77,8 +84,14 @@ export const Orders: React.FC = () => {
             throw 'Date must not be greater than the current date'
         }
 
-        await ordersService.updateOrder(rowData);
-        return newRow;
+        dialogState.current.message = `Update date to ${rowData.deliveryDate} ?`;
+        dialogState.current.action = async () => {
+            await ordersService.updateOrder(rowData);
+            confirm = true;
+        };
+        setDialogOpen(true);
+
+        return confirm ? newRow : oldRow       
     }
 
     return <Box>
@@ -101,6 +114,7 @@ export const Orders: React.FC = () => {
                 <OrderContent orderId={orderId.current} />
             </Box>
         </Modal>
+        <ConfirmationDialog isOpen={isDialogOpen} message={dialogState.current.message} state={setDialogOpen} action={dialogState.current.action} />
     </Box>
 
 }

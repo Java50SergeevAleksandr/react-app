@@ -1,4 +1,4 @@
-import { Box, Avatar, Alert, Snackbar, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material"
+import { Box, Avatar, Alert, Snackbar, Button } from "@mui/material"
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid"
 import { ProductType } from "../../model/ProductType"
 import { useSelector } from "react-redux"
@@ -13,19 +13,12 @@ export const ProductsAdmin: React.FC = () => {
     const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
     const [isProductAdd, setProductAdd] = useState<boolean>(false);
     const alertMessage = useRef<string>('');
-    const dialogState = useRef<any>({
-        isOpen: false,
+    const dialogState = useRef<any>({       
         message: "",
         action: () => '',
     });
-
-    const productID = useRef<string>('');
+  
     const products: ProductType[] = useSelector<any, ProductType[]>(state => state.productsState.products);
-
-
-    const handleClose = () => {
-        setDialogOpen(false);
-    };
 
     const columns: GridColDef[] = [
         {
@@ -52,14 +45,22 @@ export const ProductsAdmin: React.FC = () => {
     async function updateCost(newRow: any, oldRow: any): Promise<any> {
         const rowData: ProductType = newRow;
         const oldRowData: ProductType = oldRow;
+        let confirm = false;
         if (rowData.cost < 1) {
             throw 'Price must be greater than 0'
         }
         if (Math.abs(rowData.cost - oldRowData.cost) > oldRowData.cost * 0.5) {
             throw 'Price  cannot be greater than on 50% from the existing cost'
         }
-        await productsService.changeProduct(rowData);
-        return newRow
+
+        dialogState.current.message = `Update cost to ${rowData.cost} ?`;
+        dialogState.current.action = async () => {
+            await productsService.changeProduct(rowData);
+            confirm = true;
+        };
+        setDialogOpen(true);
+
+        return confirm ? newRow : oldRow
     }
 
 
@@ -98,31 +99,6 @@ export const ProductsAdmin: React.FC = () => {
 
             <ConfirmationDialog isOpen={isDialogOpen} message={dialogState.current.message} state={setDialogOpen} action={dialogState.current.action} />
 
-            {/* <Dialog
-                open={isDialogOpen}
-                onClose={handleClose}
-                aria-labelledby="remove-product-alert-dialog"
-                aria-describedby="confirm-remove-product"
-            >
-                <DialogTitle id="remove-product-alert-dialog">
-                    {"Remove product from data-base?"}
-                </DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                        Remove product from data-base.
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Disagree</Button>
-                    <Button onClick={async () => {
-                        await productsService.removeProduct(productID.current);
-                        productID.current = '';
-                        handleClose();
-                    }}>
-                        Agree
-                    </Button>
-                </DialogActions>
-            </Dialog> */}
         </Box> :
         <ProductForm submitFn={submitAddProduct}></ProductForm>;
 }

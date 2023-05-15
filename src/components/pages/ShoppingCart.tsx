@@ -51,14 +51,20 @@ export const ShoppingCart: React.FC = () => {
 
     }
 
-    async function updateCount(newRow: any): Promise<any> {
+    async function updateCount(newRow: any, oldRow: any): Promise<any> {
         const rowData: ShoppingProductDataType = newRow;
+        let confirm = false;
         if (rowData.count < 1) {
             throw 'count must be greater than 0'
         }
-        await ordersService.addShoppingProduct(authUser,
-            rowData.id!, { id: rowData.id!, count: rowData.count })
-        return newRow;
+
+        dialogState.current.message = `Update count to ${rowData.count} ?`;
+        dialogState.current.action = async () => {
+            await ordersService.addShoppingProduct(authUser, rowData.id!, { id: rowData.id!, count: rowData.count })
+            confirm = true;
+        };
+        setDialogOpen(true);
+        return confirm ? newRow : oldRow
     }
 
     const columns: GridColDef[] = [
