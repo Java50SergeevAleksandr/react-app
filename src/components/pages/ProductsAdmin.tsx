@@ -8,16 +8,19 @@ import { useRef, useState } from "react"
 import { ProductForm } from "../forms/ProductForm"
 import { ConfirmationDialog } from "../ConfirmationDialog"
 
+const UPDATE = 'Updating product cost?';
+const REMOVE = 'Removing product?';
+
 export const ProductsAdmin: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false);
-    const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [openConfirmation, setOpenConfirmation] = useState<boolean>(false);
     const [isProductAdd, setProductAdd] = useState<boolean>(false);
     const alertMessage = useRef<string>('');
-    const dialogState = useRef<any>({       
-        message: "",
-        action: () => '',
-    });
-  
+    const title = useRef<string>('');
+    const content = useRef<string>('');
+    const idRef = useRef<string>('');
+    const row = useRef<any>();
+
     const products: ProductType[] = useSelector<any, ProductType[]>(state => state.productsState.products);
 
     const columns: GridColDef[] = [
@@ -34,9 +37,10 @@ export const ProductsAdmin: React.FC = () => {
         {
             field: "actions", type: "actions", flex: 0.1, getActions: (params) => [
                 <GridActionsCellItem label="remove" icon={<Delete />} onClick={() => {
-                    dialogState.current.message = 'Remove product from data-base?';
-                    dialogState.current.action = async () => await productsService.removeProduct(params.id as string);
-                    setDialogOpen(true);
+                    idRef.current = params.id as string;
+                    title.current = REMOVE
+                    content.current = `You are going to remove ${params.row.title}(${params.row.unit})`
+                    setOpenConfirmation(true)
                 }} />
             ]
         }
@@ -45,7 +49,7 @@ export const ProductsAdmin: React.FC = () => {
     async function updateCost(newRow: any, oldRow: any): Promise<any> {
         const rowData: ProductType = newRow;
         const oldRowData: ProductType = oldRow;
-        let confirm = false;
+
         if (rowData.cost < 1) {
             throw 'Price must be greater than 0'
         }
@@ -53,14 +57,13 @@ export const ProductsAdmin: React.FC = () => {
             throw 'Price  cannot be greater than on 50% from the existing cost'
         }
 
-        dialogState.current.message = `Update cost to ${rowData.cost} ?`;
-        dialogState.current.action = async () => {
-            await productsService.changeProduct(rowData);
-            confirm = true;
-        };
-        setDialogOpen(true);
-
-        return confirm ? newRow : oldRow
+        idRef.current = newRow.id;
+        title.current = UPDATE;
+        content.current = `You are going to update cost from ${oldRowData.cost} to ${rowData.cost}
+        of the ${newRow.title}(${newRow.unit})`
+        row.current = newRow;
+        setOpenConfirmation(true);
+        return oldRow;
     }
 
 
@@ -73,6 +76,18 @@ export const ProductsAdmin: React.FC = () => {
         } else {
             return 'Product already exist';
         }
+    }
+
+    function closeFn(isAgree: boolean): void {
+        if (isAgree) {
+            if (title.current == REMOVE) {
+                productsService.removeProduct(idRef.current);
+            } else {
+                productsService.addProduct(row.current);
+            }
+
+        }
+        setOpenConfirmation(false);
     }
 
     return !isProductAdd ?
@@ -97,7 +112,7 @@ export const ProductsAdmin: React.FC = () => {
                 </Alert>
             </Snackbar>
 
-            <ConfirmationDialog isOpen={isDialogOpen} message={dialogState.current.message} state={setDialogOpen} action={dialogState.current.action} />
+            <ConfirmationDialog open={openConfirmation} onCloseFn={closeFn} title={title.current} content={content.current} />
 
         </Box> :
         <ProductForm submitFn={submitAddProduct}></ProductForm>;

@@ -2,8 +2,10 @@
     "units": [
         "piece",
         "100g",
-        "box"
+        "box",
+        "loaf",
+        "10 pieces"
     ],
-    "minCost": 1,
+    "minCost": 3,
     "maxCost": 300
 }
