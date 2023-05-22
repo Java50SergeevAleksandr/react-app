@@ -1,48 +1,49 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { useEffect, useState } from "react";
+
+import * as React from 'react';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import { Box } from '@mui/material';
 
 type Props = {
-    isOpen: boolean,
-    message: string,
-    state: (state: boolean) => void,
-    action: () => void
+    open: boolean;
+    onCloseFn: (isAgree: boolean) => void;
+    title: string;
+    content: string
 }
-export const ConfirmationDialog: React.FC<Props> = ({ isOpen, message, state, action }) => {
-    const [isDialogOpen, setDialogOpen] = useState<boolean>(isOpen);
 
-    useEffect(() => {
-        if (message) {
-            setDialogOpen(isOpen)
-        }
-    }, [isOpen]);
+export const ConfirmationDialog: React.FC<Props> = ({ open, onCloseFn, title, content }) => {
 
-    const handleClose = () => {
-        state(false);
+    function handleClose(isAgree: boolean) {
+        onCloseFn(isAgree)
     };
 
-
-    return <Dialog
-        open={isDialogOpen}
-        onClose={handleClose}
-        aria-labelledby="remove-product-alert-dialog"
-        aria-describedby="confirm-remove-product"
-    >
-        <DialogTitle id="remove-product-alert-dialog">
-            {message}
-        </DialogTitle>
-        <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-                {message}
-            </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-            <Button onClick={handleClose}>Disagree</Button>
-            <Button onClick={async () => {
-                await action();
-                handleClose();
-            }}>
-                Agree
-            </Button>
-        </DialogActions>
-    </Dialog>
+    return (
+        <Box>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {title}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        {content}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => handleClose(false)}>Disagree</Button>
+                    <Button onClick={() => handleClose(true)} autoFocus>
+                        Agree
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Box>
+    );
 }

@@ -1,3 +1,8 @@
+import { useSelector } from "react-redux"
+import { Products } from "./Products";
+import { Orders } from "./Orders";
+
 export const Home: React.FC = () => {
-    return <h2>Home loaded</h2>
+    const authUser = useSelector<any, string>(state => state.auth.authUser);
+    return !authUser || !authUser.includes('admin') ? <Products /> : <Orders />
 }

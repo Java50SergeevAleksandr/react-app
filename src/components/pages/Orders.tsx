@@ -1,5 +1,5 @@
 import { LocalShipping, Visibility } from "@mui/icons-material";
-import { Alert, Box, Modal, Snackbar, Typography } from "@mui/material";
+import { Alert, Box, Modal, Snackbar, Typography, useMediaQuery } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from "@mui/x-data-grid";
 import { useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -7,39 +7,72 @@ import { ordersService } from "../../config/orders-service-config";
 import { OrderType } from "../../model/OrderType";
 import { ConfirmationDialog } from "../ConfirmationDialog";
 import { OrderContent } from "../OrderContent";
+import { RotateNeed } from "../RotateNeed";
 
 export const Orders: React.FC = () => {
-    const authUser = useSelector<any, string>(state => state.auth.authUser);
-    const orders = useSelector<any, OrderType[]>(state => state.ordersState.orders);
-    const [open, setOpen] = useState<boolean>(false);
-    const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [openAlert, setOpenAlert] = useState(false);
     const [openContent, setOpenContent] = useState(false);
-    const columns: GridColDef[] = useMemo(() => getColumns(), [authUser, orders]);
     const orderId = useRef('');
+    const [openConfirmation, setOpenConfirmation] = useState<boolean>(false);
     const alertMessage = useRef<string>('');
-    const dialogState = useRef<any>({
-        message: "",
-        action: () => '',
-    });
+    const title = useRef<string>('');
+    const content = useRef<string>('');
+    const deliveryDate = useRef<string>('');
+    const orders = useSelector<any, OrderType[]>(state => state.ordersState.orders);
+    const authUser = useSelector<any, string>(state => state.auth.authUser);
+    const tableData = useMemo(() => getTableData(), [orders]);
+    const columns: GridColDef[] = useMemo(() => getColumns(), [authUser, orders]);
+    const portrait = useMediaQuery('(max-width:600px)');
 
-    function getTotalCost(params: GridValueGetterParams): number {
-        return params.row.shopping.reduce((res: number, cur: { price: number; }) => res + cur.price, 0);
+    function actualUpdate(isAgree: boolean) {
+        if (isAgree) {
+            delivery(orderId.current, deliveryDate.current);
+        }
+        setOpenConfirmation(false)
     }
 
+    function getTableData(): {
+        id: string, email: string, productsAmount: number,
+        cost: number, orderDate: string, deliveryDate: string
+    }[] {
+        return orders.map(o => ({
+            id: o.id, email: o.email,
+            productsAmount: o.shopping.length,
+            cost: o.shopping.reduce((res, cur) => res + cur.cost * cur.count, 0),
+            orderDate: o.orderDate, deliveryDate: o.deliveryDate
+        })).sort((r1, r2) => {
+            let res = 0;
+            if (!r1.deliveryDate && r2.deliveryDate) {
+                res = -1;
+            } else if (r1.deliveryDate && !r2.deliveryDate) {
+                res = 1;
+            } else if (!r1.deliveryDate && !r2.deliveryDate) {
+                res = r1.orderDate.localeCompare(r2.orderDate);
+            } else {
+                res = r2.deliveryDate.localeCompare(r1.deliveryDate);
+            }
+            return res;
+        });
+    }
 
-
-    function getColumns(): GridColDef<OrderType, any, any>[] {
+    function getColumns(): GridColDef[] {
         const commonColumns: GridColDef[] = [
+            { field: 'id', headerName: 'ID', flex: 0.4 },
             {
-                field: 'id', headerName: 'Order ID', flex: 0.4, align: 'center', headerAlign: 'center'
+                field: 'productsAmount', headerName: 'Amount', flex: 0.3, type: "number",
+                headerAlign: 'center', align: 'center'
             },
-
-            { field: 'amount', valueGetter: ({ row }) => row.shopping.length, headerName: 'Products Amount', flex: 0.3, type: 'number', align: 'center', headerAlign: 'center' },
-            { field: 'price', valueGetter: getTotalCost, headerName: 'Price', flex: 0.2, type: 'number', align: 'center', headerAlign: 'center' },
-            { field: 'orderDate', headerName: 'Order Date', flex: 0.3, align: 'center', headerAlign: 'center' },
-            { field: 'deliveryDate', headerName: 'DeliveryDate', flex: 0.3, align: 'center', headerAlign: 'center', editable: authUser.includes('admin') },
             {
-                field: 'actions', type: 'actions', flex: 0.2, getActions: (params) => {
+                field: 'cost', headerName: 'Cost', flex: 0.4, type: "number",
+                headerAlign: 'center', align: 'center'
+            },
+            { field: 'orderDate', headerName: 'Order Date', flex: 0.5, sortable: false },
+            {
+                field: 'deliveryDate', headerName: 'Delivery Date', flex: 0.5,
+                editable: authUser.includes('admin'), sortable: false
+            },
+            {
+                field: 'actions', type: 'actions', getActions: params => {
                     const res = [<GridActionsCellItem label="details"
                         icon={<Visibility />}
                         onClick={() => {
@@ -50,75 +83,90 @@ export const Orders: React.FC = () => {
                         res.push(<GridActionsCellItem label="delivery"
                             icon={<LocalShipping />}
                             disabled={!!params.row.deliveryDate}
-                            onClick={async () => {
-                                const updatedOrder = { ...params.row };
-                                updatedOrder.deliveryDate = new Date().toISOString().substring(0, 10);
-                                await ordersService.updateOrder(updatedOrder)
-                            }} />)
+                            onClick={async () => await delivery(params.id as string,
+                                new Date().toISOString().substring(0, 10))} />)
 
                     }
                     return res;
                 }
             }
-        ]
+        ];
 
-        const adminColumns: GridColDef[] = [
-            { field: 'email', headerName: 'Email', flex: 0.3, align: 'center', headerAlign: 'center' }
-        ]
-        return authUser.includes('admin') ? adminColumns.concat(commonColumns) : commonColumns
+        if (authUser.includes('admin')) {
+            commonColumns.splice(1, 0, { field: 'email', headerName: 'Customer', flex: 0.8 })
+        }
+
+        return commonColumns;
     }
 
-    async function updateDate(newRow: any, oldRow: any): Promise<any> {
-        const rowData: OrderType = newRow;
-        const date = Date.parse(rowData.deliveryDate);
-        let confirm = false;
-        if (rowData.deliveryDate) {
+    async function delivery(id: string, date: string) {
+        const order = { ...orders.find(o => o.id == id)!, deliveryDate: date };
+        if (!!order.id) {
+            await ordersService.updateOrder(order!)
+        }
+
+    }
+
+    function updateError(error: any) {
+        alertMessage.current = JSON.stringify(error);
+        setOpenAlert(true)
+    }
+
+    async function updateDeliveryDate(newRow: any, oldRow: any) {
+        const newDeliveryDate = newRow.deliveryDate;
+        const orderDate = newRow.orderDate;
+        const date = Date.parse(newDeliveryDate.deliveryDate);
+
+        if (newDeliveryDate) {
             if (isNaN(date)) {
                 throw 'Date not in format YYYY-MM-DD, or contains illegal date values'
             }
 
-
-            if (rowData.orderDate > rowData.deliveryDate) {
-                throw 'Date must not be less than the OrderDate'
+            if (newDeliveryDate < orderDate) {
+                throw `${newDeliveryDate} must not be less than order date`
+            }
+            if (newDeliveryDate > new Date().toISOString().substring(0, 10)) {
+                throw `${newDeliveryDate} must not be greater than current date`
             }
 
-            if (new Date().toISOString().substring(0, 10) < rowData.deliveryDate) {
-                throw 'Date must not be greater than the current date'
-            }
         }
-        dialogState.current.message = `Update date to ${rowData.deliveryDate} ?`;
-        dialogState.current.action = async () => {
-            await ordersService.updateOrder(rowData);
-            confirm = true;
-        };
-        setDialogOpen(true);
-
-        return confirm ? newRow : oldRow
-
+        orderId.current = newRow.id;
+        deliveryDate.current = newDeliveryDate;
+        if (!newDeliveryDate) {
+            title.current = 'Canceling delivery?'
+            content.current = `You are going to cancel delivery of the order ${newRow.id}`
+        } else {
+            title.current = 'Updating delivery date?'
+            content.current = `You are going to update delivery date of the order ${newRow.id}
+            from ${oldRow.deliveryDate} to ${newDeliveryDate}`
+        }
+        setOpenConfirmation(true);
+        return oldRow;
     }
 
-    return <Box>
-        <Box sx={{ width: "80vw", height: "60vh" }}>
-            <DataGrid columns={columns} rows={orders} getRowHeight={() => 'auto'}
-                processRowUpdate={updateDate}
-                onProcessRowUpdateError={(error) => {
-                    alertMessage.current = error;
-                    setOpen(true)
-                }}
-            />
-        </Box>
-        <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'right' }} open={open} autoHideDuration={4000} onClose={() => setOpen(false)}>
-            <Alert severity="error" sx={{ width: '30vw', fontSize: '1.5em' }}>
-                {alertMessage.current}
-            </Alert>
-        </Snackbar>
-        <Modal open={openContent} onClose={() => setOpenContent(false)}>
-            <Box>
-                <OrderContent orderId={orderId.current} />
+    return portrait ? <RotateNeed />
+        : <Box sx={{
+            display: "flex", flexDirection: "column", height: "80vh",
+            justifyContent: "center", alignItems: "center"
+        }}>
+            <Box sx={{ width: "80vw", height: "50vh" }}>
+                <DataGrid rows={tableData} columns={columns} processRowUpdate={updateDeliveryDate}
+                    onProcessRowUpdateError={updateError} />
             </Box>
-        </Modal>
-        <ConfirmationDialog isOpen={isDialogOpen} message={dialogState.current.message} state={setDialogOpen} action={dialogState.current.action} />
-    </Box>
+            <Snackbar open={openAlert} autoHideDuration={6000} onClose={() => setOpenAlert(false)}>
+                <Alert severity="error" sx={{ width: '80vw', fontSize: '1.5em' }}>
+                    {alertMessage.current}
+                </Alert>
+            </Snackbar>
+            <Modal open={openContent} onClose={() => setOpenContent(false)}>
+                <Box>
+                    <OrderContent orderId={orderId.current} />
+                </Box>
+
+            </Modal>
+            <ConfirmationDialog open={openConfirmation} onCloseFn={actualUpdate}
+                title={title.current} content={content.current} />
+        </Box>
 
 }
 

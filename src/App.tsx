@@ -9,7 +9,7 @@ import { Orders } from './components/pages/Orders';
 import { Login } from './components/pages/Login';
 import { ShoppingCart } from './components/pages/ShoppingCart';
 import { routes } from './config/layout-config'
-import { NavigatorDesktop } from './components/navigators/NavigatorDesktop';
+import { Navigator} from './components/navigators/Navigator';
 import { Logout } from './components/pages/Logout';
 import { useDispatch, useSelector } from 'react-redux';
 import { RouteType } from './model/RouteType';
@@ -94,7 +94,7 @@ function App() {
 
   return <BrowserRouter>
     <Routes>
-      <Route path='/' element={<NavigatorDesktop routes={getRoutes()} />}>
+      <Route path='/' element={<Navigator routes={getRoutes()} />}>
         <Route index element={<Home />} />
         <Route path='login' element={<Login />} />
         <Route path='home' element={<Home />} />

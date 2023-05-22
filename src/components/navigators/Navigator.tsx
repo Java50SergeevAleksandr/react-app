@@ -1,26 +1,13 @@
-import { NavLink, Outlet } from "react-router-dom"
-import { RouteType } from "../../model/RouteType";
+import { useMediaQuery } from "@mui/material"
+import { RouteType } from "../../model/RouteType"
 import './navigators.css'
-
+import { NavigatorDesktop } from "./NavigatorDesktop"
+import { NavigatorPortrait } from "./NavigatorPortrait"
 type Props = {
-    linkInfo: RouteType[],
+    subnav?: boolean,
+    routes: RouteType[]
 }
-
-export const Navigator: React.FC<Props> = ({ linkInfo }) => {
-
-    function getLinks(linkInfo: RouteType[] ): import("react").ReactNode {
-        const res = linkInfo.map((v, i) => <li className="navigator-item paragraph-l" key={i}>
-            <NavLink to={v.path}>{v.label}</NavLink>
-        </li>);
-        return <ul className="navigator-list"> {res} </ul>
-    }
-
-    return <div>
-        <nav className="container">
-            {getLinks(linkInfo)}
-        </nav>
-        <Outlet />
-    </div>
+export const Navigator: React.FC<Props> = (props) => {
+    const navigatorDesktop = useMediaQuery('(min-width:600px)');
+    return navigatorDesktop ? <NavigatorDesktop routes={props.routes} /> : <NavigatorPortrait routes={props.routes} />;
 }
-
-
